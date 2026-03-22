@@ -4,6 +4,7 @@ import Narration from '../../components/scene/Narration';
 import ChatBubble from '../../components/scene/ChatBubble';
 import DeepDive from '../../components/scene/DeepDive';
 import SkillBuilder from '../../components/interactive/ch09/SkillBuilder';
+import SkillLoader from '../../components/interactive/ch09/SkillLoader';
 import { LanguageProvider, useLanguage } from '../../i18n/LanguageContext';
 
 export default function Ch09Scenes() {
@@ -120,6 +121,39 @@ function Ch09Content() {
             )}
           </p>
         </Narration>
+      </Scene>
+
+      <Scene>
+        <Narration>
+          <p>
+            {t(
+              <>但 Skill 的内容<strong>不是一开始就加载的</strong>。</>,
+              <>But Skill content is <strong>not loaded from the start</strong>.</>
+            )}
+          </p>
+          <p>
+            {t(
+              <>启动时只建立轻量索引——name + description。<br />完整内容只在需要时才通过 <strong>ToolSearch</strong> 加载。</>,
+              <>On startup, only a lightweight index is built — name + description.<br />Full content is only loaded via <strong>ToolSearch</strong> when needed.</>
+            )}
+          </p>
+          <p>
+            {t(
+              '延迟加载——像函数声明，只在调用时才执行。',
+              'Deferred loading — like function declarations, only executed when called.'
+            )}
+          </p>
+        </Narration>
+      </Scene>
+
+      <Scene interactive>
+        <Narration>
+          <p>{t(
+            '体验两种 Skill 触发方式——手动调用与自动召回：',
+            'Experience both Skill trigger methods — manual invoke and auto recall:'
+          )}</p>
+        </Narration>
+        <SkillLoader />
       </Scene>
 
       <Scene>

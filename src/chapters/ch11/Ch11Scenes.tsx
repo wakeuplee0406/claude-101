@@ -4,6 +4,7 @@ import Narration from '../../components/scene/Narration';
 import ChatBubble from '../../components/scene/ChatBubble';
 import DeepDive from '../../components/scene/DeepDive';
 import SubagentDispatch from '../../components/interactive/ch11/SubagentDispatch';
+import SubagentIsolation from '../../components/interactive/ch11/SubagentIsolation';
 import { LanguageProvider, useLanguage } from '../../i18n/LanguageContext';
 
 export default function Ch11Scenes() {
@@ -124,6 +125,39 @@ function Ch11Content() {
             )}
           </p>
         </Narration>
+      </Scene>
+
+      <Scene>
+        <Narration>
+          <p>
+            {t(
+              <>但分身之间是<strong>完全隔离</strong>的。</>,
+              <>But the clones are <strong>completely isolated</strong> from each other.</>
+            )}
+          </p>
+          <p>
+            {t(
+              <>每个子 Agent 有独立的 context 窗口。<br />它看不到主 Agent 的完整历史，也看不到其他子 Agent 在做什么。</>,
+              <>Each subagent has its own context window.<br />It can't see the main agent's full history, nor what other subagents are doing.</>
+            )}
+          </p>
+          <p>
+            {t(
+              '这是一个设计选择——星型拓扑，不是网状拓扑。',
+              'This is a design choice — star topology, not mesh topology.'
+            )}
+          </p>
+        </Narration>
+      </Scene>
+
+      <Scene interactive>
+        <Narration>
+          <p>{t(
+            '探索 Context 隔离机制和拓扑结构的区别：',
+            'Explore context isolation and the difference in topology:'
+          )}</p>
+        </Narration>
+        <SubagentIsolation />
       </Scene>
 
       <Scene>
