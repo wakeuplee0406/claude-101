@@ -1,0 +1,218 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { chapters, getChaptersByCategory } from '../config/chapters';
+const categories = getChaptersByCategory();
+---
+
+<Layout>
+  <div class="lang-toggle-wrapper">
+    <button class="lang-toggle" id="lang-toggle" aria-label="Switch language">
+      <span class="lang-toggle__option" data-lang-opt="zh">ZH</span>
+      <span class="lang-toggle__sep">/</span>
+      <span class="lang-toggle__option" data-lang-opt="en">EN</span>
+    </button>
+  </div>
+
+  <main class="home">
+    <section class="hero">
+      <div class="hero-badge" data-zh="交互式学习体验" data-en="Interactive Learning Experience">交互式学习体验</div>
+      <h1 class="hero-title">
+        <span class="hero-accent">Claude</span> 101
+      </h1>
+      <p class="hero-subtitle">
+        <span data-zh="以 AI 的第一人称视角" data-en="From AI's first-person perspective">以 AI 的第一人称视角</span><br />
+        <span data-zh="交互式理解 Claude Code 的工作原理" data-en="Interactively understand how Claude Code works">交互式理解 Claude Code 的工作原理</span>
+      </p>
+      <a href="/chapters/prompt" class="hero-cta">
+        <span data-zh="开始旅程" data-en="Start the Journey">开始旅程</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 8h10M9 4l4 4-4 4" />
+        </svg>
+      </a>
+    </section>
+
+    <section class="chapter-grid">
+      {chapters.map((chapter) => (
+        <a href={`/chapters/${chapter.slug}`} class="chapter-card">
+          <div class="card-header">
+            <span class="card-number">{String(chapter.id).padStart(2, '0')}</span>
+            <span class="card-icon">{chapter.icon}</span>
+          </div>
+          <h3 class="card-title">{chapter.title}</h3>
+          <p class="card-subtitle" data-zh={chapter.subtitle} data-en={chapter.subtitleEn}>{chapter.subtitle}</p>
+        </a>
+      ))}
+    </section>
+  </main>
+</Layout>
+
+<script>
+  function getCurrentLang(): string {
+    return localStorage.getItem('claude101-lang') || 'zh';
+  }
+
+  function applyLang(lang: string) {
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+    document.documentElement.dataset.lang = lang;
+
+    document.querySelectorAll('[data-lang-opt]').forEach((el) => {
+      const opt = (el as HTMLElement).dataset.langOpt;
+      el.classList.toggle('lang-toggle__option--active', opt === lang);
+    });
+
+    document.querySelectorAll('[data-zh][data-en]').forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.textContent = lang === 'en' ? htmlEl.dataset.en! : htmlEl.dataset.zh!;
+    });
+  }
+
+  function toggleLang() {
+    const current = getCurrentLang();
+    const next = current === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('claude101-lang', next);
+    applyLang(next);
+    window.dispatchEvent(new CustomEvent('claude101-lang-change', { detail: next }));
+  }
+
+  applyLang(getCurrentLang());
+  document.getElementById('lang-toggle')?.addEventListener('click', toggleLang);
+
+  window.addEventListener('claude101-lang-change', (e: Event) => {
+    applyLang((e as CustomEvent).detail);
+  });
+</script>
+
+<style>
+  .home {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 120px 20px 80px;
+    max-width: 640px;
+  }
+
+  .hero-badge {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-accent);
+    background: rgba(192, 132, 252, 0.1);
+    border: 1px solid rgba(192, 132, 252, 0.2);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .hero-title {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 20px;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+  }
+
+  .hero-accent {
+    color: var(--color-accent);
+  }
+
+  .hero-subtitle {
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 0 36px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--color-accent-dim);
+    color: white;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .hero-cta:hover {
+    background: var(--color-accent);
+  }
+
+  .chapter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    padding: 0 40px 80px;
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  .chapter-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+
+  .chapter-card:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-number {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .card-icon {
+    font-size: 24px;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 6px;
+  }
+
+  .card-subtitle {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 80px 20px 48px;
+    }
+
+    .hero-title {
+      font-size: 40px;
+    }
+
+    .chapter-grid {
+      padding: 0 16px 60px;
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

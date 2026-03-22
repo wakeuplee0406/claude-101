@@ -1,0 +1,160 @@
+---
+import Layout from './Layout.astro';
+import { chapters, getChaptersByCategory } from '../config/chapters';
+
+interface Props {
+  frontmatter?: {
+    chapter: number;
+    title: string;
+    subtitle: string;
+  };
+  chapter?: number;
+  title?: string;
+  subtitle?: string;
+}
+
+const props = Astro.props.frontmatter ?? Astro.props;
+const { chapter: chapterNum, title, subtitle } = props;
+const current = chapters.find((c) => c.id === chapterNum);
+const prev = chapters.find((c) => c.id === (chapterNum ?? 0) - 1);
+const next = chapters.find((c) => c.id === (chapterNum ?? 0) + 1);
+const pageTitle = `${String(chapterNum).padStart(2, '0')}. ${title} — Claude 101`;
+const categories = getChaptersByCategory();
+---
+
+<Layout title={pageTitle}>
+  <!-- Language Toggle -->
+  <div class="lang-toggle-wrapper">
+    <button class="lang-toggle" id="lang-toggle" aria-label="Switch language">
+      <span class="lang-toggle__option" data-lang-opt="zh">ZH</span>
+      <span class="lang-toggle__sep">/</span>
+      <span class="lang-toggle__option" data-lang-opt="en">EN</span>
+    </button>
+  </div>
+
+  <!-- Desktop Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <a href="/" class="sidebar__logo">▶ Claude 101</a>
+    </div>
+    <nav class="sidebar__nav">
+      {categories.map((cat) => (
+        <div class="sidebar__category">
+          <div class="sidebar__category-label">
+            <span class="sidebar__category-dot" style={`background: ${cat.color}`} />
+            <span data-zh={cat.name} data-en={cat.nameEn}>{cat.name}</span>
+          </div>
+          <ul class="sidebar__list">
+            {cat.chapters.map((ch) => (
+              <li>
+                <a
+                  href={`/chapters/${ch.slug}`}
+                  class:list={['sidebar__link', { 'sidebar__link--active': ch.id === chapterNum }]}
+                >
+                  <span class="sidebar__link-num">{String(ch.id).padStart(2, '0')}</span>
+                  {ch.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  </aside>
+
+  <!-- Mobile Top Bar -->
+  <div class="top-bar">
+    <button class="top-bar__menu" id="menu-toggle" aria-label="打开菜单">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="5" x2="17" y2="5" />
+        <line x1="3" y1="10" x2="17" y2="10" />
+        <line x1="3" y1="15" x2="17" y2="15" />
+      </svg>
+    </button>
+    <div class="top-bar__chapter">
+      {String(chapterNum).padStart(2, '0')}. {title}
+    </div>
+    <div class="top-bar__nav">
+      <button class="lang-toggle lang-toggle--mobile" id="lang-toggle-mobile" aria-label="Switch language">
+        <span class="lang-toggle__option" data-lang-opt="zh">ZH</span>
+        <span class="lang-toggle__sep">/</span>
+        <span class="lang-toggle__option" data-lang-opt="en">EN</span>
+      </button>
+      {prev && <a href={`/chapters/${prev.slug}`} class="top-bar__nav-btn">◀</a>}
+      {next && <a href={`/chapters/${next.slug}`} class="top-bar__nav-btn">▶</a>}
+    </div>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Scene Content -->
+  <slot />
+</Layout>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function openMenu() {
+    sidebar?.classList.add('sidebar--open');
+    overlay?.classList.add('sidebar-overlay--visible');
+  }
+
+  function closeMenu() {
+    sidebar?.classList.remove('sidebar--open');
+    overlay?.classList.remove('sidebar-overlay--visible');
+  }
+
+  toggle?.addEventListener('click', () => {
+    if (sidebar?.classList.contains('sidebar--open')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  overlay?.addEventListener('click', closeMenu);
+
+  // Language toggle logic
+  function getCurrentLang(): string {
+    return localStorage.getItem('claude101-lang') || 'zh';
+  }
+
+  function applyLang(lang: string) {
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+    document.documentElement.dataset.lang = lang;
+
+    // Update toggle button active states
+    document.querySelectorAll('[data-lang-opt]').forEach((el) => {
+      const opt = (el as HTMLElement).dataset.langOpt;
+      el.classList.toggle('lang-toggle__option--active', opt === lang);
+    });
+
+    // Swap text in elements with data-zh / data-en attributes
+    document.querySelectorAll('[data-zh][data-en]').forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.textContent = lang === 'en' ? htmlEl.dataset.en! : htmlEl.dataset.zh!;
+    });
+  }
+
+  function toggleLang() {
+    const current = getCurrentLang();
+    const next = current === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('claude101-lang', next);
+    applyLang(next);
+    window.dispatchEvent(new CustomEvent('claude101-lang-change', { detail: next }));
+  }
+
+  // Init
+  applyLang(getCurrentLang());
+
+  document.getElementById('lang-toggle')?.addEventListener('click', toggleLang);
+  document.getElementById('lang-toggle-mobile')?.addEventListener('click', toggleLang);
+
+  // Listen for changes from React islands
+  window.addEventListener('claude101-lang-change', (e: Event) => {
+    applyLang((e as CustomEvent).detail);
+  });
+</script>

@@ -1,0 +1,49 @@
+export interface Chapter {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  subtitleEn: string;
+  icon: string;
+  category: string;
+}
+
+export interface ChapterCategory {
+  name: string;
+  nameEn: string;
+  color: string;
+  chapters: Chapter[];
+}
+
+export const chapters: Chapter[] = [
+  { id: 1, slug: 'prompt', title: 'Prompt', subtitle: '你收到了第一条指令', subtitleEn: 'Your First Instruction', icon: '💬', category: '基础概念' },
+  { id: 2, slug: 'context', title: 'Context', subtitle: '你能看到什么？', subtitleEn: 'What Can You See?', icon: '👁', category: '基础概念' },
+  { id: 3, slug: 'tools', title: 'Tools', subtitle: '你有了手和脚', subtitleEn: 'You Now Have Hands and Feet', icon: '🛠', category: '工具与执行' },
+  { id: 4, slug: 'agentic-loop', title: 'Agentic Loop', subtitle: '思考、行动、观察、重复', subtitleEn: 'Think, Act, Observe, Repeat', icon: '🔄', category: '工具与执行' },
+  { id: 5, slug: 'mcp', title: 'MCP', subtitle: '连接外部世界', subtitleEn: 'Connecting to the Outside World', icon: '🔌', category: '工具与执行' },
+  { id: 6, slug: 'rag-memory', title: 'RAG & Memory', subtitle: '跨越遗忘的鸿沟', subtitleEn: 'Bridging the Gap of Forgetting', icon: '🧠', category: '记忆与知识' },
+  { id: 7, slug: 'hooks', title: 'Hooks', subtitle: '自动化的触发器', subtitleEn: 'Automated Triggers', icon: '⚡', category: '扩展能力' },
+  { id: 8, slug: 'skills', title: 'Skills', subtitle: '可复用的超能力', subtitleEn: 'Reusable Superpowers', icon: '✨', category: '扩展能力' },
+  { id: 9, slug: 'plugins', title: 'Plugins', subtitle: '打包你的超能力', subtitleEn: 'Package Your Superpowers', icon: '📦', category: '扩展能力' },
+  { id: 10, slug: 'agents', title: 'Agents & Subagents', subtitle: '分身术', subtitleEn: 'The Art of Cloning', icon: '👥', category: '协作与治理' },
+  { id: 11, slug: 'permissions', title: 'Permissions & Safety', subtitle: '信任的边界', subtitleEn: 'The Boundaries of Trust', icon: '🛡', category: '协作与治理' },
+  { id: 12, slug: 'configuration', title: 'Configuration', subtitle: '定制你的 Claude Code', subtitleEn: 'Customize Your Claude Code', icon: '⚙', category: '协作与治理' },
+];
+
+const categoryMeta: Record<string, { en: string; color: string }> = {
+  '基础概念': { en: 'Fundamentals', color: '#3b82f6' },
+  '工具与执行': { en: 'Tools & Execution', color: '#22c55e' },
+  '记忆与知识': { en: 'Memory & Knowledge', color: '#a855f7' },
+  '扩展能力': { en: 'Extensions', color: '#f59e0b' },
+  '协作与治理': { en: 'Collaboration & Governance', color: '#ef4444' },
+};
+
+export function getChaptersByCategory(): ChapterCategory[] {
+  const categoryOrder = ['基础概念', '工具与执行', '记忆与知识', '扩展能力', '协作与治理'];
+  return categoryOrder.map((name) => ({
+    name,
+    nameEn: categoryMeta[name]?.en || name,
+    color: categoryMeta[name]?.color || '#999',
+    chapters: chapters.filter((c) => c.category === name),
+  }));
+}
